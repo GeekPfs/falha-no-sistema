@@ -63,7 +63,7 @@ function loop(frame)
             if virus[i].y > 270 then virus[i].yv = -virus[i].yv end
             if virus[i].y < 0 then virus[i].yv = -virus[i].yv end
             
-            if pl.x < virus[i].x + 10 and pl.x + 10 > virus[i] and pl.y < virus[i] + 10 and pl.y + 10 > virus[i] then
+            if pl.x < virus[i].x + 10 and pl.x + 10 > virus[i].x and pl.y < virus[i].y + 10 and pl.y + 10 > virus[i].y then
                 estado = 2
             end
         end
