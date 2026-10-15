@@ -1,4 +1,4 @@
-```lua
+
 require "palette"
 require "sprites"
 
@@ -48,4 +48,4 @@ function loop(frame)
     ui.print("Oi, Lupi td bem?", 32, 32, Palette.hex(0xFFFFFF))
     ui.rectfill(pl.x, pl.y, pl.x + 10, pl.y + 10, Palette.hex(0xFFFFFF))
 end
-```
+
