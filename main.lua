@@ -43,7 +43,7 @@ function loop(frame)
         virus[i].y = virus[i].y + virus[i].yv
         if virus[i].x > 480 then virus[i].xv = -virus[i].xv end
         if virus[i].x < 0 then virus[i].xv = -virus[i].xv end
-        if virus[i].y > 480 then virus[i].yv = -virus[i].yv end
+        if virus[i].y > 270 then virus[i].yv = -virus[i].yv end
         if virus[i].y < 0 then virus[i].yv = -virus[i].yv end
     end
     
