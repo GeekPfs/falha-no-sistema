@@ -10,12 +10,12 @@ pl.yvd=0
 function loop(frame)
     pl.x = pl.x + pl.xv
     pl.y = pl.y + pl.yv
-    pl.xv = pl.xv + ((0-pl.xv)*0.5)
-    pl.yv = pl.yv + ((0-pl.yv)*0.5)
-    if ui.btn(0) then pl.xv = pl.xv + ((5-pl.xv)*0.5) end
-    if ui.btn(1) then pl.xv = pl.xv + ((-5-pl.xv)*0.5) end
-    if ui.btn(2) then pl.yv = pl.yv + ((-5-pl.yv)*0.5) end
-    if ui.btn(3) then pl.yv = pl.yv + ((5-pl.yv)*0.5) end
+    pl.xv = pl.xv + ((0-pl.xv)*0.1)
+    pl.yv = pl.yv + ((0-pl.yv)*0.1)
+    if ui.btn(0) then pl.xv = pl.xv + ((5-pl.xv)*0.1) end
+    if ui.btn(1) then pl.xv = pl.xv + ((-5-pl.xv)*0.1) end
+    if ui.btn(2) then pl.yv = pl.yv + ((5-pl.yv)*0.1) end
+    if ui.btn(3) then pl.yv = pl.yv + ((-5-pl.yv)*0.1) end
     
     for i = 1, #Palette do
         local color = Palette[i]
