@@ -6,7 +6,7 @@ function gerar_virus()
         x = math.random(5, 475),
         y = math.random(5, 265),
         xv = math.random(1,2) + math.random(),
-        yv = math.random(1,2) + math.random()
+        yv = math.random(1,2) + math.random(),
     }
 end
 
@@ -31,13 +31,27 @@ pl.yv = 0
 pl.atrit = 0.10
 pl.veloc = 0.10
 estado = 1
-
+pl.dash = 12
+pl.dx = 1
+pl.dy = 0
 function loop(frame)
 
     if estado == 1 then
         pl.x = pl.x + pl.xv
         pl.y = pl.y + pl.yv
-
+        if ui.btnp(4) then
+            local dx = pl.xv
+            local dy = pl.yv
+            local dist = math.sqrt(dx*dx + dy*dy)
+        
+            if dist > 0 then
+                pl.xv = (dx / dist) * pl.dash
+                pl.yv = (dy / dist) * pl.dash
+            else
+                pl.xv = pl.dx * pl.dash
+                pl.yv = pl.dy * pl.dash
+            end
+        end
         if pl.x < 0 then pl.x = 0 pl.xv = 0 end
         if pl.x > 470 then pl.x = 470 pl.xv = 0 end
 
@@ -53,7 +67,10 @@ function loop(frame)
         if ui.btn(1) then pl.xv = pl.xv + ((5 - pl.xv) * pl.veloc) end
         if ui.btn(2) then pl.yv = pl.yv + ((-5 - pl.yv) * pl.veloc) end
         if ui.btn(3) then pl.yv = pl.yv + ((5 - pl.yv) * pl.veloc) end
-
+        if ui.btn(0) then pl.dx = -1 pl.dy = 0 end
+        if ui.btn(1) then pl.dx = 1 pl.dy = 0 end
+        if ui.btn(2) then pl.dx = 0 pl.dy = -1 end
+        if ui.btn(3) then pl.dx = 0 pl.dy = 1 end
         for i = 1, #virus do
             virus[i].x = virus[i].x + virus[i].xv
             virus[i].y = virus[i].y + virus[i].yv
