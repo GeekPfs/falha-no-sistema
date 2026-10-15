@@ -522,7 +522,6 @@ function desenhar_gameover()
     ui.print("FINAL SCORE",193,106,cor(CFG.CINZA))
     ui.print(tostring(score),224,127,cor(CFG.VERDE))
     ui.print("BEST COMBO: x"..melhor_combo,155,155,cor(CFG.VERMELHO_CLARO))
-    ui.print("SESSION RECORD: "..recorde
 require "palette"
 require "sprites"
 
