@@ -23,8 +23,8 @@ ponto = gerar_ponto()
 score = 0
 
 pl = {}
-pl.x = 10
-pl.y = 10
+pl.x = 240
+pl.y = 135
 pl.xv = 0
 pl.yv = 0
 
@@ -104,5 +104,19 @@ function loop(frame)
     if estado == 2 then
         ui.print("game over", 32, 32, Palette.hex(0xFFFFFF))
         ui.print("score: "..score, 32, 48, Palette.hex(0xFFFFFF))
+        f ui.btn(4) then 
+        estado = 1
+        virus = {}
+        virus[1] = gerar_virus()
+        ponto = gerar_ponto()
+        score = 0
+        
+        pl = {}
+        pl.x = 240
+        pl.y = 135
+        pl.xv = 0
+        pl.yv = 0
+
+        end
     end
 end
