@@ -66,6 +66,7 @@ function loop(frame)
     if pl.x < ponto.x + 10 and pl.x + 10 > ponto.x and pl.y < ponto.y + 10 and pl.y + 10 > ponto.y then
         ponto=gerar_ponto()
         score=score+1
+        table.insert(virus,gerar_virus())
     end
     for i = 1, #Palette do
         local color = Palette[i]
@@ -75,8 +76,9 @@ function loop(frame)
     ui.clip(0, 0, 480, 270)
     ui.camera(0, 0)
     ui.cls(Palette.hex(0x45283c))
-
-    ui.circfill(virus[1].x, virus[1].y, 5, Palette.hex(0xFFFFFF))
+    for i=1,#virus do
+        ui.circfill(virus[i].x, virus[i].y, 5, Palette.hex(0xFFFFFF))
+    end
     ui.circfill(ponto.x, ponto.y, 2, Palette.hex(0xFFFFFF))
     ui.print("Oi, Lupi td bem?", 32, 32, Palette.hex(0xFFFFFF))
     ui.rectfill(pl.x, pl.y, pl.x + 10, pl.y + 10, Palette.hex(0xFFFFFF))
