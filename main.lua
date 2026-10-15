@@ -60,7 +60,11 @@ function loop(frame)
         if virus[i].y > 270 then virus[i].yv = -virus[i].yv end
         if virus[i].y < 0 then virus[i].yv = -virus[i].yv end
     end
-    
+
+
+    if pl.x > ponto.x and pl.x < ponto.x + 10 and pl.y > ponto.y and pl.y < ponto.y + 10 then
+        ponto=gerar_ponto()
+    end
     for i = 1, #Palette do
         local color = Palette[i]
         ui.palset(i - 1, color)
