@@ -111,7 +111,6 @@ function loop(frame)
         ponto = gerar_ponto()
         score = 0
         
-        pl = {}
         pl.x = 240
         pl.y = 135
         pl.xv = 0
