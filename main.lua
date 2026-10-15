@@ -928,4 +928,332 @@ function desenhar_intro()
 
     ui.rectfill(
         24, 32, 456, 230,
-       
+        cor(CFG.FUNDO_PAINEL)
+    )
+
+    ui.rectfill(
+        24, 32, 456, 34,
+        cor(CFG.VERMELHO)
+    )
+
+    ui.print(
+        "BOOT SEQUENCE // ERROR",
+        38, 46,
+        cor(CFG.VERMELHO)
+    )
+
+    ui.print(
+        "--------------------------------",
+        38, 59,
+        cor(CFG.VERMELHO_ESCURO)
+    )
+
+    local texto1 = string.sub(
+        CFG.INTRO_TEXTO, 1, intro_indice
+    )
+
+    local texto2 = string.sub(
+        CFG.INTRO_TEXTO_2, 1, intro_indice_2
+    )
+
+    ui.print(
+        "> " .. texto1,
+        38, 90,
+        cor(CFG.BRANCO)
+    )
+
+    if intro_indice >= #CFG.INTRO_TEXTO then
+        ui.print(
+            "> " .. texto2,
+            38, 112,
+            cor(CFG.VERDE)
+        )
+    end
+
+    if frame_atual % 30 < 15 then
+        ui.rectfill(
+            38 + intro_indice * 6,
+            101,
+            43 + intro_indice * 6,
+            108,
+            cor(CFG.VERMELHO)
+        )
+    end
+
+    ui.print(
+        "WARNING: UNAUTHORIZED PROCESS",
+        38, 166,
+        cor(CFG.VERMELHO_CLARO)
+    )
+
+    ui.print(
+        "MEMORY INTEGRITY: COMPROMISED",
+        38, 180,
+        cor(CFG.VERMELHO)
+    )
+
+    ui.print(
+        "PLEASE WAIT...",
+        38, 207,
+        cor(CFG.CINZA)
+    )
+end
+
+-- =========================================================
+-- MENU INICIAL
+-- =========================================================
+
+function desenhar_menu()
+    desenhar_fundo()
+
+    -- Painel central
+    ui.rectfill(
+        35, 27, 445, 243,
+        cor(CFG.FUNDO_PAINEL)
+    )
+
+    ui.rectfill(
+        35, 27, 445, 30,
+        cor(CFG.VERMELHO)
+    )
+
+    -- Titulo com deslocamento RGB
+    ui.print(
+        "SYSTEM",
+        139 + math.random(-1, 1), 50,
+        cor(CFG.VERMELHO)
+    )
+
+    ui.print(
+        "BREACH",
+        139, 73,
+        cor(CFG.BRANCO)
+    )
+
+    ui.print(
+        "// CRITICAL FAILURE //",
+        139, 94,
+        cor(CFG.VERMELHO_CLARO)
+    )
+
+    ui.rectfill(
+        75, 116, 405, 117,
+        cor(CFG.VERMELHO_ESCURO)
+    )
+
+    -- Botao PLAY
+    local piscar = frame_atual % 40 < 28
+
+    if piscar then
+        ui.rectfill(
+            145, 133, 335, 164,
+            cor(CFG.VERMELHO)
+        )
+
+        ui.print(
+            "[ PLAY ]",
+            207, 145,
+            cor(CFG.BRANCO)
+        )
+    else
+        ui.rectfill(
+            145, 133, 335, 164,
+            cor(CFG.VERMELHO_ESCURO)
+        )
+
+        ui.print(
+            "[ PLAY ]",
+            207, 145,
+            cor(CFG.VERMELHO_CLARO)
+        )
+    end
+
+    if CFG.MOSTRAR_CONTROLES then
+        ui.print(
+            "MOVE: ARROWS",
+            82, 187,
+            cor(CFG.CINZA)
+        )
+
+        ui.print(
+            "DASH: BUTTON 5",
+            260, 187,
+            cor(CFG.CINZA)
+        )
+    end
+
+    ui.print(
+        "SURVIVE THE INFECTION",
+        142, 216,
+        cor(CFG.VERDE)
+    )
+end
+
+-- =========================================================
+-- GAME OVER
+-- =========================================================
+
+function desenhar_gameover()
+    desenhar_fundo()
+
+    ui.rectfill(
+        45, 27, 435, 243,
+        cor(CFG.FUNDO_PAINEL)
+    )
+
+    ui.rectfill(
+        45, 27, 435, 30,
+        cor(CFG.VERMELHO)
+    )
+
+    ui.print(
+        "CONNECTION LOST",
+        130 + math.random(-1, 1),
+        51,
+        cor(CFG.VERMELHO)
+    )
+
+    ui.print(
+        "SYSTEM FAILURE",
+        147, 72,
+        cor(CFG.BRANCO)
+    )
+
+    ui.rectfill(
+        75, 94, 405, 95,
+        cor(CFG.VERMELHO_ESCURO)
+    )
+
+    ui.print(
+        "FINAL SCORE",
+        193, 106,
+        cor(CFG.CINZA)
+    )
+
+    ui.print(
+        tostring(score),
+        224, 127,
+        cor(CFG.VERDE)
+    )
+
+    ui.print(
+        "BEST COMBO: x" .. melhor_combo,
+        155, 155,
+        cor(CFG.VERMELHO_CLARO)
+    )
+
+    ui.print(
+        "SESSION RECORD: " .. recorde_sessao,
+        145, 174,
+        cor(CFG.CINZA)
+    )
+
+    if frame_atual % 40 < 28 then
+        ui.print(
+            "> PRESS BUTTON 5 TO REBOOT",
+            100, 207,
+            cor(CFG.VERDE)
+        )
+    end
+end
+
+-- =========================================================
+-- LOOP PRINCIPAL
+-- =========================================================
+
+function loop(frame)
+    frame_atual = frame_atual + 1
+
+    atualizar_efeitos()
+
+    -- INTRO
+    if estado == 0 then
+        if frame_atual % math.max(1, CFG.INTRO_VELOCIDADE) == 0 then
+            if intro_indice < #CFG.INTRO_TEXTO then
+                intro_indice = intro_indice + 1
+
+            elseif intro_indice_2 < #CFG.INTRO_TEXTO_2 then
+                intro_indice_2 = intro_indice_2 + 1
+
+            else
+                intro_espera = intro_espera + 1
+
+                if intro_espera >= CFG.INTRO_ESPERA then
+                    estado = 3
+                end
+            end
+        end
+
+        -- Botao 5 permite pular a animacao.
+        if ui.btnp(4) then
+            estado = 3
+        end
+
+    -- MENU
+    elseif estado == 3 then
+        menu_anim = menu_anim + 1
+
+        if ui.btnp(4) then
+            iniciar_jogo()
+        end
+
+    -- JOGO
+    elseif estado == 1 then
+        atualizar_jogo()
+
+    -- GAME OVER
+    elseif estado == 2 then
+        gameover_anim = gameover_anim + 1
+
+        if ui.btnp(4) then
+            estado = 3
+            virus = {}
+            particulas = {}
+            rastro = {}
+            pl = gerar_jogador()
+        end
+    end
+
+    -- =====================================================
+    -- RENDERIZACAO FINAL
+    -- =====================================================
+
+    for i = 1, #Palette do
+        ui.palset(i - 1, Palette[i])
+    end
+
+    ui.clip(0, 0, CFG.LARGURA, CFG.ALTURA)
+
+    local sx = 0
+    local sy = 0
+
+    if tremor > 0 then
+        local t = math.floor(tremor)
+
+        if t > 0 then
+            sx = math.random(-t, t)
+            sy = math.random(-t, t)
+        end
+    end
+
+    ui.camera(0, 0)
+    desenhar_fundo()
+
+    ui.camera(sx, sy)
+
+    if estado == 1 then
+        desenhar_jogo()
+    elseif estado == 2 then
+        desenhar_particulas()
+    end
+
+    ui.camera(0, 0)
+
+    if estado == 0 then
+        desenhar_intro()
+    elseif estado == 3 then
+        desenhar_menu()
+    elseif estado == 2 then
+        desenhar_gameover()
+    end
+end
