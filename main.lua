@@ -1,5 +1,6 @@
 require "palette"
 require "sprites"
+pl={}
 pl.x=10
 pl.y=10
 function loop(frame)
