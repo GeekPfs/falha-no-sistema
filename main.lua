@@ -27,6 +27,13 @@ function loop(frame)
     pl.x = pl.x + pl.xv
     pl.y = pl.y + pl.yv
 
+
+    if pl.x < 0 then pl.x = 0 pl.xv = 0 end
+    if pl.x > 470 then pl.x = 470 pl.xv = 0 end
+    
+    if pl.y < 0 then pl.y = 0 pl.yv = 0 end
+    if pl.y > 260 then pl.y = 260 pl.yv = 0 end
+    
     if not (ui.btn(0) or ui.btn(1) or ui.btn(2) or ui.btn(3)) then
         pl.xv = pl.xv + ((0 - pl.xv) * pl.atrit)
         pl.yv = pl.yv + ((0 - pl.yv) * pl.atrit)
