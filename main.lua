@@ -5,10 +5,10 @@ pl.x=10
 pl.y=10
 function loop(frame)
 
-    if ui.btn(0) then pl.x=pl.x + 1 end
-    if ui.btn(1) then pl.x=pl.x - 1 end
-    if ui.btn(2) then pl.y=pl.y + 1 end
-    if ui.btn(3) then pl.y=pl.y - 1 end
+    if ui.btn(0) then pl.x=pl.x - 1 end
+    if ui.btn(1) then pl.x=pl.x + 1 end
+    if ui.btn(2) then pl.y=pl.y - 1 end
+    if ui.btn(3) then pl.y=pl.y + 1 end
     
     for i = 1, #Palette do
         local color = Palette[i]
