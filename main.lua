@@ -6,8 +6,8 @@ function gerar_virus()
     return {
         x = math.random(0, 480),
         y = math.random(0, 270),
-        xv = math.random(1,5) + math.random(),
-        yv = math.random(1,5) + math.random()
+        xv = math.random(1,2) + math.random(),
+        yv = math.random(1,2) + math.random()
     }
 end
 
