@@ -5,7 +5,9 @@ require "sprites"
 function gerar_virus()
     return {
         x = math.random(0, 480),
-        y = math.random(0, 270)
+        y = math.random(0, 270),
+        xv = math.random(1,5) + math.random()
+        yv = math.random(1,5) + math.random()
     }
 end
 
@@ -35,6 +37,12 @@ function loop(frame)
     if ui.btn(2) then pl.yv = pl.yv + ((-5 - pl.yv) * pl.veloc) end
     if ui.btn(3) then pl.yv = pl.yv + ((5 - pl.yv) * pl.veloc) end
 
+
+    for i=1, #virus do
+        virus[i].x = virus[i].x + virus[i].xv
+        virus[i].y = virus[i].y + virus[i].yv
+    end
+    
     for i = 1, #Palette do
         local color = Palette[i]
         ui.palset(i - 1, color)
