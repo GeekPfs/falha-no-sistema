@@ -1,16 +1,27 @@
 require "palette"
 require "sprites"
+
+function gerar_virus()
+    return 
+    x = math.random(0,480),
+    y = math.random(0,270),
+    
+end
+
+virus={}
+virus[1]=gerar_virus()
 pl={}
 pl.x=10
 pl.y=10
 pl.xv=0
 pl.yv=0
 
-
-
 pl.atrit=0.10
 pl.veloc=0.10
 function loop(frame)
+
+    
+    
     pl.x = pl.x + pl.xv
     pl.y = pl.y + pl.yv
     if not (ui.btn(0) or ui.btn(1) or ui.btn(2) or ui.btn(3)) then 
@@ -31,7 +42,7 @@ function loop(frame)
     ui.clip(0,0,480,270)
     ui.camera(0,0)
     ui.cls(Palette.hex(0x45283c))
-    
+    ui.circfill(virus[1].x,virus[1].y,5,Palette.hex(0xFFFFFF))
     ui.print("Oi, Lupi td bem?", 32, 32, Palette.hex(0xFFFFFF))
     ui.rectfill(pl.x, pl.y, pl.x+10, pl.y+10, Palette.hex(0xFFFFFF))
 end 
