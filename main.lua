@@ -2,36 +2,89 @@
 require "palette"
 require "sprites"
 
--- ==========================================
--- CONFIGURACAO
--- ==========================================
+-- =========================================================
+-- CONFIGURACAO GERAL
+-- Altere estes valores para personalizar o jogo.
+-- =========================================================
 
-LARGURA = 480
-ALTURA = 270
-FPS = 60
+CFG = {
+    LARGURA = 480,
+    ALTURA = 270,
+    FPS = 60,
 
-FUNDO = 0x160F25
-BRANCO = 0xFFFFFF
-CIANO = 0x48F0E0
-ROXO = 0xB56AFF
-ROSA = 0xFF5C9A
-AMARELO = 0xFFE66D
-VERMELHO = 0xFF5263
+    -- CORES: formato hexadecimal RGB
+    FUNDO = 0x080609,
+    FUNDO_PAINEL = 0x180B10,
+    VERMELHO = 0xFF243F,
+    VERMELHO_ESCURO = 0x781426,
+    VERMELHO_CLARO = 0xFF6174,
+    VERDE = 0x45FF78,
+    VERDE_ESCURO = 0x126B36,
+    BRANCO = 0xF5F0F0,
+    CINZA = 0x88777D,
+    AMARELO = 0xFFE66D,
 
-CORES = {
-    0x48F0E0,
-    0xB56AFF,
-    0xFF5C9A,
-    0xFFE66D,
-    0x6DAAFF
+    -- JOGADOR
+    PLAYER_RAIO = 5,
+    PLAYER_ACELERACAO = 0.10,
+    PLAYER_ATRITO = 0.10,
+    PLAYER_VELOCIDADE_MAX = 5,
+    PLAYER_DASH_VELOCIDADE = 12,
+    PLAYER_DASH_COOLDOWN = 0, -- 0 = sem cooldown
+
+    -- VIRUS
+    VIRUS_INICIAIS = 1,
+    VIRUS_POR_PONTO = 1,
+    VIRUS_RAIO = 5,
+
+    -- Velocidade inicial aleatoria dos virus
+    VIRUS_VEL_INICIAL_MIN = 1.5,
+    VIRUS_VEL_INICIAL_MAX = 2.5,
+
+    -- Progressao de velocidade dos virus
+    VIRUS_VEL_MAX = 5.0,
+    VIRUS_AUMENTO_VEL = 0.20,
+    VIRUS_INTERVALO_AUMENTO = 5,
+    -- Tempo em segundos entre aumentos de velocidade.
+
+    -- COMBO E OVERDRIVE
+    COMBO_TEMPO = 5,
+    COMBO_PARA_OVERDRIVE = 10,
+    OVERDRIVE_TEMPO = 5,
+    OVERDRIVE_PONTOS_POR_VIRUS = 1,
+
+    -- EFEITOS VISUAIS
+    PARTICULAS_COLETA = 24,
+    PARTICULAS_EXPLOSAO = 35,
+    RASTRO_LIMITE = 40,
+    RASTRO_FREQUENCIA = 2,
+    SCANLINES = true,
+    SCANLINE_INTERVALO = 3,
+    GLITCH_ATIVO = true,
+    GLITCH_FREQUENCIA = 0.08,
+    GLITCH_BLOCOS = 5,
+    TREMOR_MAX = 7,
+
+    -- ABERTURA
+    INTRO_TEXTO = "VIRUS INVADIU O SISTEMA...",
+    INTRO_TEXTO_2 = "SOBREVIVA.",
+    INTRO_VELOCIDADE = 2,
+    INTRO_ESPERA = 75,
+
+    -- MENU
+    MOSTRAR_CONTROLES = true,
 }
 
--- ==========================================
--- FUNCOES AUXILIARES
--- ==========================================
+-- =========================================================
+-- FUNCOES BASICAS
+-- =========================================================
 
-function aleatoria_cor()
-    return CORES[math.random(1, #CORES)]
+function cor(hex)
+    return Palette.hex(hex)
+end
+
+function limitar(v, min, max)
+    return math.max(min, math.min(v, max))
 end
 
 function distancia(x1, y1, x2, y2)
@@ -40,33 +93,113 @@ function distancia(x1, y1, x2, y2)
     return math.sqrt(dx * dx + dy * dy)
 end
 
-function limitar(v, minimo, maximo)
-    return math.max(minimo, math.min(v, maximo))
+function aleatoria_cor_virus()
+    local cores = {
+        CFG.VERMELHO,
+        CFG.VERMELHO_CLARO,
+        CFG.VERMELHO_ESCURO
+    }
+
+    return cores[math.random(1, #cores)]
 end
 
+function velocidade_aleatoria()
+    return CFG.VIRUS_VEL_INICIAL_MIN +
+        math.random() *
+        (CFG.VIRUS_VEL_INICIAL_MAX -
+        CFG.VIRUS_VEL_INICIAL_MIN)
+end
+
+-- =========================================================
+-- ENTIDADES
+-- =========================================================
+
 function gerar_virus()
+    local angulo = math.random() * math.pi * 2
+    local velocidade = velocidade_aleatoria()
+
     return {
-        x = math.random(10, 470),
-        y = math.random(10, 260),
-        xv = (math.random(1, 2) + math.random()) *
-            (math.random(0, 1) == 0 and -1 or 1),
-        yv = (math.random(1, 2) + math.random()) *
-            (math.random(0, 1) == 0 and -1 or 1),
-        cor = aleatoria_cor(),
-        fase = math.random(0, 100)
+        x = math.random(12, CFG.LARGURA - 12),
+        y = math.random(12, CFG.ALTURA - 12),
+
+        xv = math.cos(angulo) * velocidade,
+        yv = math.sin(angulo) * velocidade,
+
+        cor = aleatoria_cor_virus(),
+        fase = math.random(0, 100),
+        pulso = math.random(0, 100)
     }
 end
 
 function gerar_ponto()
     return {
-        x = math.random(12, 468),
-        y = math.random(12, 258),
-        cor = aleatoria_cor(),
-        fase = 0
+        x = math.random(12, CFG.LARGURA - 12),
+        y = math.random(20, CFG.ALTURA - 12),
+        fase = 0,
+        cor = CFG.VERDE
     }
 end
 
-function criar_particula(x, y, cor, quantidade, forca)
+function gerar_jogador()
+    return {
+        x = CFG.LARGURA / 2,
+        y = CFG.ALTURA / 2,
+        xv = 0,
+        yv = 0,
+        dx = 1,
+        dy = 0,
+        anim = 0,
+        dash_cooldown = 0
+    }
+end
+
+-- =========================================================
+-- ESTADO GLOBAL
+-- =========================================================
+
+estado = 0
+-- 0 = intro
+-- 1 = jogo
+-- 2 = game over
+-- 3 = menu
+
+virus = {}
+particulas = {}
+rastro = {}
+glitches = {}
+
+pl = gerar_jogador()
+ponto = gerar_ponto()
+
+score = 0
+combo = 0
+melhor_combo = 0
+
+combo_timer = 0
+overdrive = 0
+tremor = 0
+
+tempo_jogo = 0
+tempo_aumento_virus = 0
+velocidade_virus_atual = CFG.VIRUS_VEL_INICIAL_MIN
+
+intro_indice = 0
+intro_indice_2 = 0
+intro_espera = 0
+intro_finalizada = false
+
+menu_anim = 0
+gameover_anim = 0
+recorde_sessao = 0
+
+frame_atual = 0
+glitch_timer = 0
+
+-- =========================================================
+-- PARTICULAS E EFEITOS
+-- =========================================================
+
+function criar_particula(x, y, cor_particula, quantidade, forca)
     for i = 1, quantidade do
         local angulo = math.random() * math.pi * 2
         local velocidade = math.random() * forca
@@ -76,108 +209,40 @@ function criar_particula(x, y, cor, quantidade, forca)
             y = y,
             xv = math.cos(angulo) * velocidade,
             yv = math.sin(angulo) * velocidade,
-            vida = math.random(12, 28),
+            vida = math.random(10, 28),
             vida_max = 28,
-            cor = cor,
+            cor = cor_particula,
             tamanho = math.random(1, 3)
         })
     end
 end
 
-function explosao(x, y, cor)
-    criar_particula(x, y, cor, 20, 3)
-    criar_particula(x, y, BRANCO, 7, 2)
-    tremor = math.max(tremor, 4)
-end
-
-function criar_rastro(x, y, cor, tamanho)
+function criar_rastro(x, y, cor_rastro, tamanho)
     table.insert(rastro, {
         x = x,
         y = y,
         vida = 12,
         tamanho = tamanho,
-        cor = cor
+        cor = cor_rastro
     })
 
-    if #rastro > 45 then
+    while #rastro > CFG.RASTRO_LIMITE do
         table.remove(rastro, 1)
     end
 end
 
--- ==========================================
--- ESTADO DO JOGO
--- ==========================================
+function explosao(x, y, cor_explosao)
+    criar_particula(
+        x, y, cor_explosao,
+        CFG.PARTICULAS_EXPLOSAO, 4
+    )
 
-function reiniciar()
-    virus = {}
-    virus[1] = gerar_virus()
+    criar_particula(
+        x, y, CFG.BRANCO, 8, 2
+    )
 
-    ponto = gerar_ponto()
-    particulas = {}
-    rastro = {}
-
-    score = 0
-    combo = 0
-    melhor_combo = 0
-
-    combo_timer = 0
-    overdrive = 0
-    tremor = 0
-    tempo_jogo = 0
-
-    pl = {
-        x = 240,
-        y = 135,
-        xv = 0,
-        yv = 0,
-        atrit = 0.10,
-        veloc = 0.10,
-        dash = 12,
-        dx = 1,
-        dy = 0,
-        cor = CIANO,
-        anim = 0
-    }
-
-    estado = 1
+    tremor = math.max(tremor, CFG.TREMOR_MAX)
 end
-
-reiniciar()
-
--- ==========================================
--- COLETAR PONTO
--- ==========================================
-
-function coletar_ponto()
-    score = score + 1
-    combo = combo + 1
-    combo_timer = 300
-
-    if combo > melhor_combo then
-        melhor_combo = combo
-    end
-
-    explosao(ponto.x, ponto.y, ponto.cor)
-
-    ponto = gerar_ponto()
-
-    -- Cada ponto cria um novo virus.
-    table.insert(virus, gerar_virus())
-
-    -- Ativa o modo especial ao atingir 10.
-    if combo >= 10 and overdrive <= 0 then
-        overdrive = 300
-        tremor = 8
-
-        criar_particula(
-            pl.x + 5, pl.y + 5, AMARELO, 45, 5
-        )
-    end
-end
-
--- ==========================================
--- ATUALIZAR PARTICULAS
--- ==========================================
 
 function atualizar_efeitos()
     for i = #particulas, 1, -1 do
@@ -196,7 +261,6 @@ function atualizar_efeitos()
 
     for i = #rastro, 1, -1 do
         local p = rastro[i]
-
         p.vida = p.vida - 1
 
         if p.vida <= 0 then
@@ -205,7 +269,7 @@ function atualizar_efeitos()
     end
 
     if tremor > 0 then
-        tremor = tremor * 0.75
+        tremor = tremor * 0.72
 
         if tremor < 0.3 then
             tremor = 0
@@ -213,244 +277,375 @@ function atualizar_efeitos()
     end
 end
 
--- ==========================================
--- LOOP PRINCIPAL
--- ==========================================
+function gerar_glitch()
+    glitches = {}
 
-function loop(frame)
+    for i = 1, CFG.GLITCH_BLOCOS do
+        table.insert(glitches, {
+            x = math.random(0, CFG.LARGURA - 1),
+            y = math.random(0, CFG.ALTURA - 1),
+            w = math.random(5, 65),
+            h = math.random(1, 5),
+            cor = math.random(0, 1) == 0
+                and CFG.VERMELHO
+                or CFG.VERDE
+        })
+    end
+end
 
-    atualizar_efeitos()
+-- =========================================================
+-- INICIALIZACAO / REINICIO
+-- =========================================================
 
-    if estado == 1 then
+function iniciar_jogo()
+    virus = {}
+    particulas = {}
+    rastro = {}
+    glitches = {}
 
-        tempo_jogo = tempo_jogo + 1
-        pl.anim = pl.anim + 1
+    pl = gerar_jogador()
+    ponto = gerar_ponto()
 
-        if combo_timer > 0 then
-            combo_timer = combo_timer - 1
+    for i = 1, CFG.VIRUS_INICIAIS do
+        table.insert(virus, gerar_virus())
+    end
 
-            if combo_timer <= 0 then
-                combo = 0
-            end
-        end
+    score = 0
+    combo = 0
+    melhor_combo = 0
 
-        if overdrive > 0 then
-            overdrive = overdrive - 1
+    combo_timer = 0
+    overdrive = 0
+    tremor = 0
 
-            if overdrive <= 0 then
-                combo = 0
-                combo_timer = 0
-            end
-        end
+    tempo_jogo = 0
+    tempo_aumento_virus = 0
+    velocidade_virus_atual = CFG.VIRUS_VEL_INICIAL_MIN
 
-        -- Movimento
-        pl.x = pl.x + pl.xv
-        pl.y = pl.y + pl.yv
+    gameover_anim = 0
+    estado = 1
+end
 
-        -- Dash na direcao do movimento.
-        if ui.btnp(4) then
-            local dx = pl.xv
-            local dy = pl.yv
-            local dist = math.sqrt(dx * dx + dy * dy)
+-- =========================================================
+-- COMBO / COLETA
+-- =========================================================
 
-            if dist > 0.1 then
-                pl.xv = (dx / dist) * pl.dash
-                pl.yv = (dy / dist) * pl.dash
-            else
-                pl.xv = pl.dx * pl.dash
-                pl.yv = pl.dy * pl.dash
-            end
+function coletar_ponto()
+    score = score + 1
+    combo = combo + 1
+    combo_timer = math.floor(CFG.COMBO_TEMPO * CFG.FPS)
 
-            criar_particula(
-                pl.x + 5, pl.y + 5, pl.cor, 15, 3
+    if combo > melhor_combo then
+        melhor_combo = combo
+    end
+
+    if score > recorde_sessao then
+        recorde_sessao = score
+    end
+
+    explosao(ponto.x, ponto.y, CFG.VERDE)
+
+    criar_particula(
+        ponto.x, ponto.y,
+        CFG.VERDE_ESCURO, 12, 2
+    )
+
+    for i = 1, CFG.VIRUS_POR_PONTO do
+        table.insert(virus, gerar_virus())
+    end
+
+    ponto = gerar_ponto()
+
+    -- O limite do combo pode ser configurado no CFG.
+    if combo >= CFG.COMBO_PARA_OVERDRIVE
+        and overdrive <= 0 then
+
+        overdrive = math.floor(
+            CFG.OVERDRIVE_TEMPO * CFG.FPS
+        )
+
+        tremor = CFG.TREMOR_MAX
+
+        criar_particula(
+            pl.x, pl.y,
+            CFG.VERDE, 50, 5
+        )
+    end
+end
+
+-- =========================================================
+-- MOVIMENTO DOS VIRUS
+-- =========================================================
+
+function aumentar_velocidade_virus()
+    local max_vel = CFG.VIRUS_VEL_MAX
+
+    for i = 1, #virus do
+        local v = virus[i]
+        local vel = math.sqrt(v.xv * v.xv + v.yv * v.yv)
+
+        if vel > 0 then
+            local nova_vel = math.min(
+                vel + CFG.VIRUS_AUMENTO_VEL,
+                max_vel
             )
-            tremor = math.max(tremor, 2)
+
+            v.xv = v.xv / vel * nova_vel
+            v.yv = v.yv / vel * nova_vel
+        end
+    end
+end
+
+function atualizar_virus()
+    for i = 1, #virus do
+        local v = virus[i]
+
+        v.x = v.x + v.xv
+        v.y = v.y + v.yv
+        v.fase = v.fase + 1
+        v.pulso = v.pulso + 1
+
+        if v.x > CFG.LARGURA - CFG.VIRUS_RAIO then
+            v.x = CFG.LARGURA - CFG.VIRUS_RAIO
+            v.xv = -math.abs(v.xv)
         end
 
-        -- Limites da tela
-        if pl.x < 0 then
-            pl.x = 0
-            pl.xv = 0
+        if v.x < CFG.VIRUS_RAIO then
+            v.x = CFG.VIRUS_RAIO
+            v.xv = math.abs(v.xv)
         end
 
-        if pl.x > 470 then
-            pl.x = 470
-            pl.xv = 0
+        if v.y > CFG.ALTURA - CFG.VIRUS_RAIO then
+            v.y = CFG.ALTURA - CFG.VIRUS_RAIO
+            v.yv = -math.abs(v.yv)
         end
 
-        if pl.y < 0 then
-            pl.y = 0
-            pl.yv = 0
+        if v.y < CFG.VIRUS_RAIO then
+            v.y = CFG.VIRUS_RAIO
+            v.yv = math.abs(v.yv)
+        end
+    end
+end
+
+-- =========================================================
+-- ATUALIZACAO DO JOGO
+-- =========================================================
+
+function atualizar_jogo()
+    tempo_jogo = tempo_jogo + 1
+
+    -- Aumento gradual da velocidade dos virus.
+    tempo_aumento_virus = tempo_aumento_virus + 1
+
+    local intervalo = math.max(
+        1,
+        math.floor(CFG.VIRUS_INTERVALO_AUMENTO * CFG.FPS)
+    )
+
+    if tempo_aumento_virus >= intervalo then
+        tempo_aumento_virus = 0
+        aumentar_velocidade_virus()
+    end
+
+    -- Combo
+    if combo_timer > 0 then
+        combo_timer = combo_timer - 1
+
+        if combo_timer <= 0 then
+            combo = 0
+        end
+    end
+
+    -- Overdrive
+    if overdrive > 0 then
+        overdrive = overdrive - 1
+
+        if overdrive <= 0 then
+            combo = 0
+            combo_timer = 0
+        end
+    end
+
+    if pl.dash_cooldown > 0 then
+        pl.dash_cooldown = pl.dash_cooldown - 1
+    end
+
+    pl.anim = pl.anim + 1
+
+    -- Movimento do jogador
+    pl.x = pl.x + pl.xv
+    pl.y = pl.y + pl.yv
+
+    -- Atrito
+    if not (
+        ui.btn(0) or ui.btn(1) or
+        ui.btn(2) or ui.btn(3)
+    ) then
+        pl.xv = pl.xv * (1 - CFG.PLAYER_ATRITO)
+        pl.yv = pl.yv * (1 - CFG.PLAYER_ATRITO)
+    end
+
+    -- Direcoes
+    if ui.btn(0) then
+        pl.xv = pl.xv - CFG.PLAYER_ACELERACAO *
+            (CFG.PLAYER_VELOCIDADE_MAX + pl.xv)
+        pl.dx = -1
+        pl.dy = 0
+    end
+
+    if ui.btn(1) then
+        pl.xv = pl.xv + CFG.PLAYER_ACELERACAO *
+            (CFG.PLAYER_VELOCIDADE_MAX - pl.xv)
+        pl.dx = 1
+        pl.dy = 0
+    end
+
+    if ui.btn(2) then
+        pl.yv = pl.yv - CFG.PLAYER_ACELERACAO *
+            (CFG.PLAYER_VELOCIDADE_MAX + pl.yv)
+        pl.dx = 0
+        pl.dy = -1
+    end
+
+    if ui.btn(3) then
+        pl.yv = pl.yv + CFG.PLAYER_ACELERACAO *
+            (CFG.PLAYER_VELOCIDADE_MAX - pl.yv)
+        pl.dx = 0
+        pl.dy = 1
+    end
+
+    -- Limite de velocidade do jogador
+    local vel = math.sqrt(pl.xv * pl.xv + pl.yv * pl.yv)
+
+    if vel > CFG.PLAYER_VELOCIDADE_MAX then
+        pl.xv = pl.xv / vel * CFG.PLAYER_VELOCIDADE_MAX
+        pl.yv = pl.yv / vel * CFG.PLAYER_VELOCIDADE_MAX
+    end
+
+    -- Dash
+    if ui.btnp(4) and pl.dash_cooldown <= 0 then
+        local dx = pl.xv
+        local dy = pl.yv
+        local dist = math.sqrt(dx * dx + dy * dy)
+
+        if dist > 0.1 then
+            pl.xv = dx / dist * CFG.PLAYER_DASH_VELOCIDADE
+            pl.yv = dy / dist * CFG.PLAYER_DASH_VELOCIDADE
+        else
+            pl.xv = pl.dx * CFG.PLAYER_DASH_VELOCIDADE
+            pl.yv = pl.dy * CFG.PLAYER_DASH_VELOCIDADE
         end
 
-        if pl.y > 260 then
-            pl.y = 260
-            pl.yv = 0
-        end
+        pl.dash_cooldown = math.floor(
+            CFG.PLAYER_DASH_COOLDOWN * CFG.FPS
+        )
 
-        -- Atrito
-        if not (
-            ui.btn(0) or ui.btn(1) or
-            ui.btn(2) or ui.btn(3)
-        ) then
-            pl.xv = pl.xv * (1 - pl.atrit)
-            pl.yv = pl.yv * (1 - pl.atrit)
-        end
+        criar_particula(
+            pl.x, pl.y, CFG.VERMELHO_CLARO, 20, 3
+        )
 
-        -- Controles direcionais
-        if ui.btn(0) then
-            pl.xv = pl.xv + (-5 - pl.xv) * pl.veloc
-            pl.dx = -1
-            pl.dy = 0
-        end
+        tremor = math.max(tremor, 2)
+    end
 
-        if ui.btn(1) then
-            pl.xv = pl.xv + (5 - pl.xv) * pl.veloc
-            pl.dx = 1
-            pl.dy = 0
-        end
+    -- Limites da tela
+    pl.x = limitar(pl.x, 0, CFG.LARGURA - 10)
+    pl.y = limitar(pl.y, 0, CFG.ALTURA - 10)
 
-        if ui.btn(2) then
-            pl.yv = pl.yv + (-5 - pl.yv) * pl.veloc
-            pl.dx = 0
-            pl.dy = -1
-        end
+    -- Rastro
+    if tempo_jogo % math.max(1, CFG.RASTRO_FREQUENCIA) == 0 then
+        criar_rastro(
+            pl.x + 5,
+            pl.y + 5,
+            overdrive > 0 and CFG.VERDE or CFG.VERMELHO,
+            overdrive > 0 and 5 or 3
+        )
+    end
 
-        if ui.btn(3) then
-            pl.yv = pl.yv + (5 - pl.yv) * pl.veloc
-            pl.dx = 0
-            pl.dy = 1
-        end
+    atualizar_virus()
 
-        -- Rastro do jogador
-        if tempo_jogo % 2 == 0 then
-            local cor = pl.cor
+    -- Colisao com ponto verde
+    if distancia(
+        pl.x + 5, pl.y + 5,
+        ponto.x, ponto.y
+    ) < CFG.PLAYER_RAIO + 4 then
+        coletar_ponto()
+    end
 
-            if overdrive > 0 then
-                cor = AMARELO
-            end
+    -- Colisao com virus
+    for i = #virus, 1, -1 do
+        local v = virus[i]
 
-            criar_rastro(
-                pl.x + 5,
-                pl.y + 5,
-                cor,
-                overdrive > 0 and 5 or 3
-            )
-        end
-
-        -- Movimento dos virus
-        for i = 1, #virus do
-            local v = virus[i]
-
-            v.x = v.x + v.xv
-            v.y = v.y + v.yv
-            v.fase = v.fase + 1
-
-            if v.x > 475 then
-                v.x = 475
-                v.xv = -math.abs(v.xv)
-            end
-
-            if v.x < 5 then
-                v.x = 5
-                v.xv = math.abs(v.xv)
-            end
-
-            if v.y > 265 then
-                v.y = 265
-                v.yv = -math.abs(v.yv)
-            end
-
-            if v.y < 5 then
-                v.y = 5
-                v.yv = math.abs(v.yv)
-            end
-        end
-
-        -- Coleta do ponto
         if distancia(
             pl.x + 5, pl.y + 5,
-            ponto.x, ponto.y
-        ) < 10 then
-            coletar_ponto()
-        end
+            v.x, v.y
+        ) < CFG.PLAYER_RAIO + CFG.VIRUS_RAIO then
 
-        -- Colisoes com os virus.
-        -- No overdrive, os virus sao coletados.
-        for i = #virus, 1, -1 do
-            local v = virus[i]
+            if overdrive > 0 then
+                score = score + CFG.OVERDRIVE_PONTOS_POR_VIRUS
 
-            if distancia(
-                pl.x + 5, pl.y + 5,
-                v.x, v.y
-            ) < 11 then
-
-                if overdrive > 0 then
-                    score = score + 1
-
-                    explosao(v.x, v.y, v.cor)
-
-                    table.remove(virus, i)
-                else
-                    explosao(pl.x + 5, pl.y + 5, VERMELHO)
-                    estado = 2
-                    break
+                if score > recorde_sessao then
+                    recorde_sessao = score
                 end
+
+                explosao(v.x, v.y, CFG.VERDE)
+                table.remove(virus, i)
+            else
+                explosao(pl.x + 5, pl.y + 5, CFG.VERMELHO)
+                estado = 2
+                break
             end
         end
+    end
+end
 
-    elseif estado == 2 then
+-- =========================================================
+-- DESENHO: FUNDO CORROMPIDO
+-- =========================================================
 
-        -- Reiniciar somente ao pressionar o botao.
-        if ui.btnp(4) then
-            reiniciar()
+function desenhar_fundo()
+    ui.cls(cor(CFG.FUNDO))
+
+    -- Ruido decorativo fixo
+    for i = 1, 45 do
+        local x = (i * 137) % CFG.LARGURA
+        local y = (i * 79) % CFG.ALTURA
+
+        ui.rectfill(
+            x, y, x + 1, y + 1,
+            cor(CFG.VERMELHO_ESCURO)
+        )
+    end
+
+    -- Linhas horizontais de monitor CRT
+    if CFG.SCANLINES then
+        for y = 0, CFG.ALTURA, CFG.SCANLINE_INTERVALO do
+            ui.rectfill(
+                0, y, CFG.LARGURA, y,
+                cor(0x160B10)
+            )
+        end
+    end
+
+    -- Glitches ocasionais
+    if CFG.GLITCH_ATIVO then
+        if math.random() < CFG.GLITCH_FREQUENCIA then
+            gerar_glitch()
         end
 
+        for i = 1, #glitches do
+            local g = glitches[i]
+
+            ui.rectfill(
+                g.x, g.y,
+                math.min(CFG.LARGURA, g.x + g.w),
+                math.min(CFG.ALTURA, g.y + g.h),
+                cor(g.cor)
+            )
+        end
     end
+end
 
-    -- ======================================
-    -- RENDERIZACAO
-    -- ======================================
-
-    for i = 1, #Palette do
-        ui.palset(i - 1, Palette[i])
-    end
-
-    ui.clip(0, 0, LARGURA, ALTURA)
-
-    local shake_x = 0
-    local shake_y = 0
-
-    if tremor > 0 then
-        shake_x = math.random(
-            -math.floor(tremor),
-            math.floor(tremor)
-        )
-
-        shake_y = math.random(
-            -math.floor(tremor),
-            math.floor(tremor)
-        )
-    end
-
-    ui.camera(0, 0)
-    ui.cls(Palette.hex(FUNDO))
-
-    -- Pontos decorativos de fundo
-    for i = 1, 35 do
-        local x = (i * 137) % LARGURA
-        local y = (i * 79) % ALTURA
-
-        ui.circfill(
-            x, y, 1,
-            Palette.hex(0x40314F)
-        )
-    end
-
-    -- Tremor afeta o mundo, nao a interface.
-    ui.camera(shake_x, shake_y)
-
-    -- Rastro da bola
+function desenhar_rastro()
     for i = 1, #rastro do
         local p = rastro[i]
         local tamanho = math.max(
@@ -459,237 +654,278 @@ function loop(frame)
         )
 
         ui.circfill(
-            p.x, p.y, tamanho + 2,
-            Palette.hex(0x40314F)
+            p.x + 2, p.y,
+            tamanho + 1,
+            cor(CFG.VERMELHO_ESCURO)
         )
-
-        ui.circfill(
-            p.x, p.y, tamanho,
-            Palette.hex(p.cor)
-        )
-    end
-
-    if estado == 1 then
-
-        -- Ponto: halo e nucleo.
-        ui.circfill(
-            ponto.x, ponto.y, 7,
-            Palette.hex(0x40314F)
-        )
-
-        ui.circfill(
-            ponto.x, ponto.y, 4,
-            Palette.hex(ponto.cor)
-        )
-
-        ui.circfill(
-            ponto.x, ponto.y, 2,
-            Palette.hex(BRANCO)
-        )
-
-        -- Virus coloridos.
-        for i = 1, #virus do
-            local v = virus[i]
-
-            ui.circfill(
-                v.x, v.y, 7,
-                Palette.hex(0x40314F)
-            )
-
-            ui.circfill(
-                v.x, v.y, 5,
-                Palette.hex(v.cor)
-            )
-
-            ui.circfill(
-                v.x - 1, v.y - 1, 2,
-                Palette.hex(BRANCO)
-            )
-        end
-
-        -- Jogador: esfera luminosa.
-        local px = pl.x + 5
-        local py = pl.y + 5
-        local cor_jogador = pl.cor
-
-        if overdrive > 0 then
-            cor_jogador = AMARELO
-        end
-
-        ui.circfill(
-            px, py, 10,
-            Palette.hex(0x40314F)
-        )
-
-        ui.circfill(
-            px, py, 7,
-            Palette.hex(cor_jogador)
-        )
-
-        ui.circfill(
-            px - 2, py - 2, 3,
-            Palette.hex(BRANCO)
-        )
-
-        if overdrive > 0 then
-            ui.circfill(
-                px, py, 12,
-                Palette.hex(AMARELO)
-            )
-
-            ui.circfill(
-                px, py, 7,
-                Palette.hex(AMARELO)
-            )
-
-            ui.circfill(
-                px - 2, py - 2, 3,
-                Palette.hex(BRANCO)
-            )
-        end
-
-    end
-
-    -- Particulas por cima do mundo.
-    for i = 1, #particulas do
-        local p = particulas[i]
 
         ui.circfill(
             p.x, p.y,
-            math.max(1, p.tamanho),
-            Palette.hex(p.cor)
+            tamanho,
+            cor(p.cor)
         )
-    end
-
-    -- Interface sem tremor.
-    ui.camera(0, 0)
-
-    if estado == 1 then
-
-        -- Painel superior
-        ui.rectfill(
-            10, 10, 135, 35,
-            Palette.hex(0x29203C)
-        )
-
-        ui.print(
-            "SCORE  " .. score,
-            18, 19,
-            Palette.hex(BRANCO)
-        )
-
-        -- Combo
-        if combo > 1 then
-            local cor_combo = CIANO
-
-            if combo >= 7 then
-                cor_combo = ROSA
-            end
-
-            if combo >= 10 then
-                cor_combo = AMARELO
-            end
-
-            ui.print(
-                "COMBO x" .. combo,
-                160, 19,
-                Palette.hex(cor_combo)
-            )
-
-            local largura = math.floor(
-                60 * combo_timer / 300
-            )
-
-            ui.rectfill(
-                160, 31, 220, 34,
-                Palette.hex(0x40314F)
-            )
-
-            if largura > 0 then
-                ui.rectfill(
-                    160, 31, 160 + largura, 34,
-                    Palette.hex(cor_combo)
-                )
-            end
-        end
-
-        -- Medidor do overdrive
-        if overdrive > 0 then
-            ui.rectfill(
-                290, 10, 465, 35,
-                Palette.hex(0x40314F)
-            )
-
-            ui.print(
-                "OVERDRIVE!",
-                302, 15,
-                Palette.hex(AMARELO)
-            )
-
-            local largura = math.floor(
-                165 * overdrive / 300
-            )
-
-            ui.rectfill(
-                295, 29, 295 + largura, 32,
-                Palette.hex(AMARELO)
-            )
-        else
-            ui.print(
-                "10 COMBOS = OVERDRIVE",
-                290, 19,
-                Palette.hex(0xA99ABF)
-            )
-        end
-
-        ui.print(
-            "DASH: BOTAO 5",
-            10, 252,
-            Palette.hex(0xA99ABF)
-        )
-
-    elseif estado == 2 then
-
-        -- Game over
-        ui.rectfill(
-            65, 35, 415, 235,
-            Palette.hex(0x29203C)
-        )
-
-        ui.rectfill(
-            70, 40, 410, 230,
-            Palette.hex(FUNDO)
-        )
-
-        ui.print(
-            "GAME OVER",
-            181, 66,
-            Palette.hex(ROSA)
-        )
-
-        ui.print(
-            "SCORE FINAL",
-            188, 100,
-            Palette.hex(0xA99ABF)
-        )
-
-        ui.print(
-            tostring(score),
-            225, 120,
-            Palette.hex(BRANCO)
-        )
-
-        ui.print(
-            "MELHOR COMBO: x" .. melhor_combo,
-            157, 150,
-            Palette.hex(CIANO)
-        )
-
-        ui.print(
-            "APERTE DASH PARA REINICIAR",
-            130, 192,
-            Palette.hex(AMARELO)
-        )
-
     end
 end
+
+function desenhar_particulas()
+    for i = 1, #particulas do
+        local p = particulas[i]
+
+        ui.rectfill(
+            p.x, p.y,
+            p.x + p.tamanho,
+            p.y + p.tamanho,
+            cor(p.cor)
+        )
+    end
+end
+
+-- =========================================================
+-- DESENHO: JOGO
+-- =========================================================
+
+function desenhar_jogador()
+    local x = pl.x + 5
+    local y = pl.y + 5
+
+    local cor_player = CFG.VERMELHO_CLARO
+
+    if overdrive > 0 then
+        cor_player = CFG.VERDE
+    end
+
+    -- Separacao RGB falsa: duplicacao deslocada
+    ui.circfill(
+        x - 2, y, CFG.PLAYER_RAIO + 2,
+        cor(CFG.VERMELHO_ESCURO)
+    )
+
+    ui.circfill(
+        x + 2, y, CFG.PLAYER_RAIO,
+        cor(CFG.VERMELHO)
+    )
+
+    ui.circfill(
+        x, y, CFG.PLAYER_RAIO - 1,
+        cor(cor_player)
+    )
+
+    ui.circfill(
+        x - 1, y - 2, 2,
+        cor(CFG.BRANCO)
+    )
+
+    -- Pequenas falhas ao redor do jogador
+    if frame_atual % 7 < 2 then
+        ui.rectfill(
+            x - 8, y - 1,
+            x + 9, y,
+            cor(CFG.VERMELHO_CLARO)
+        )
+    end
+end
+
+function desenhar_ponto()
+    local x = ponto.x
+    local y = ponto.y
+
+    -- Halo verde
+    ui.circfill(x, y, 9, cor(CFG.VERDE_ESCURO))
+    ui.circfill(x, y, 6, cor(CFG.VERDE))
+    ui.circfill(x, y, 3, cor(CFG.BRANCO))
+
+    -- Cruz digital
+    ui.rectfill(
+        x - 10, y, x - 7, y + 1,
+        cor(CFG.VERDE)
+    )
+
+    ui.rectfill(
+        x + 7, y, x + 10, y + 1,
+        cor(CFG.VERDE)
+    )
+
+    if frame_atual % 9 < 3 then
+        ui.rectfill(
+            x - 5, y - 8, x + 5, y - 7,
+            cor(CFG.VERDE)
+        )
+    end
+end
+
+function desenhar_virus()
+    for i = 1, #virus do
+        local v = virus[i]
+        local x = v.x
+        local y = v.y
+
+        -- Halo vermelho
+        ui.circfill(
+            x + 2, y,
+            CFG.VIRUS_RAIO + 3,
+            cor(CFG.VERMELHO_ESCURO)
+        )
+
+        ui.circfill(
+            x, y,
+            CFG.VIRUS_RAIO,
+            cor(v.cor)
+        )
+
+        ui.circfill(
+            x - 1, y - 1,
+            2,
+            cor(CFG.BRANCO)
+        )
+
+        -- Artefato de sinal
+        if v.fase % 13 < 3 then
+            ui.rectfill(
+                x - 8, y - 1,
+                x + 9, y,
+                cor(CFG.VERMELHO_CLARO)
+            )
+        end
+    end
+end
+
+function desenhar_hud()
+    -- Painel
+    ui.rectfill(
+        8, 8, 139, 36,
+        cor(CFG.FUNDO_PAINEL)
+    )
+
+    ui.rectfill(
+        8, 8, 11, 36,
+        cor(CFG.VERMELHO)
+    )
+
+    ui.print(
+        "SCORE",
+        18, 12,
+        cor(CFG.CINZA)
+    )
+
+    ui.print(
+        tostring(score),
+        18, 22,
+        cor(CFG.BRANCO)
+    )
+
+    -- Combo
+    if combo > 0 then
+        local texto_combo = "COMBO x" .. combo
+        local cor_combo = CFG.VERMELHO_CLARO
+
+        if combo >= CFG.COMBO_PARA_OVERDRIVE then
+            cor_combo = CFG.VERDE
+        end
+
+        ui.print(
+            texto_combo,
+            160, 14,
+            cor(cor_combo)
+        )
+
+        local total = math.max(
+            1,
+            CFG.COMBO_TEMPO * CFG.FPS
+        )
+
+        local largura = math.floor(
+            70 * combo_timer / total
+        )
+
+        ui.rectfill(
+            160, 27, 230, 30,
+            cor(CFG.VERMELHO_ESCURO)
+        )
+
+        if largura > 0 then
+            ui.rectfill(
+                160, 27, 160 + largura, 30,
+                cor(cor_combo)
+            )
+        end
+    end
+
+    -- Estado do Overdrive
+    if overdrive > 0 then
+        ui.rectfill(
+            300, 8, 471, 36,
+            cor(CFG.VERDE_ESCURO)
+        )
+
+        ui.print(
+            "SYSTEM OVERRIDE",
+            308, 12,
+            cor(CFG.VERDE)
+        )
+
+        ui.print(
+            "ACTIVE",
+            308, 23,
+            cor(CFG.BRANCO)
+        )
+
+        local total = math.max(
+            1,
+            CFG.OVERDRIVE_TEMPO * CFG.FPS
+        )
+
+        local largura = math.floor(
+            155 * overdrive / total
+        )
+
+        ui.rectfill(
+            308, 31, 463, 33,
+            cor(CFG.FUNDO)
+        )
+
+        if largura > 0 then
+            ui.rectfill(
+                308, 31, 308 + largura, 33,
+                cor(CFG.VERDE)
+            )
+        end
+    else
+        ui.print(
+            "SYSTEM INFECTED",
+            318, 17,
+            cor(CFG.VERMELHO)
+        )
+    end
+
+    ui.print(
+        "DASH: BOTAO 5",
+        10, 252,
+        cor(CFG.CINZA)
+    )
+
+    ui.print(
+        "VIRUS: " .. #virus,
+        370, 252,
+        cor(CFG.VERMELHO_CLARO)
+    )
+end
+
+function desenhar_jogo()
+    desenhar_rastro()
+    desenhar_ponto()
+    desenhar_virus()
+    desenhar_jogador()
+    desenhar_particulas()
+    desenhar_hud()
+end
+
+-- =========================================================
+-- INTRO: TEXTO SENDO DIGITADO
+-- =========================================================
+
+function desenhar_intro()
+    desenhar_fundo()
+
+    ui.rectfill(
+        24, 32, 456, 230,
+       
