@@ -41,10 +41,10 @@ function loop(frame)
     for i=1, #virus do
         virus[i].x = virus[i].x + virus[i].xv
         virus[i].y = virus[i].y + virus[i].yv
-        if virus[i].xv > 480 then virus[i].xv = -virus[i].xv end
-        if virus[i].xv < 0 then virus[i].xv = -virus[i].xv end
-        if virus[i].yv > 480 then virus[i].yv = -virus[i].yv end
-        if virus[i].yv < 0 then virus[i].yv = -virus[i].yv end
+        if virus[i].x > 480 then virus[i].xv = -virus[i].xv end
+        if virus[i].x < 0 then virus[i].xv = -virus[i].xv end
+        if virus[i].y > 480 then virus[i].yv = -virus[i].yv end
+        if virus[i].y < 0 then virus[i].yv = -virus[i].yv end
     end
     
     for i = 1, #Palette do
