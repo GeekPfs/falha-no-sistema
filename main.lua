@@ -9,7 +9,7 @@ function gerar_virus()
 end
 
 virus={}
-virus[1]=gerar_virus()
+virus[1]={gerar_virus()}
 pl={}
 pl.x=10
 pl.y=10
