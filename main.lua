@@ -7,8 +7,8 @@ pl.xv=0
 pl.yv=0
 pl.xvd=0
 pl.yvd=0
-pl.atrit=0.01
-pl.veloc=0.08
+pl.atrit=0.09
+pl.veloc=0.06
 function loop(frame)
     pl.x = pl.x + pl.xv
     pl.y = pl.y + pl.yv
