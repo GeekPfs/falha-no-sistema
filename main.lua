@@ -5,15 +5,19 @@ pl.x=10
 pl.y=10
 pl.xv=0
 pl.yv=0
-pl.atrit=1
-pl.veloc=1
+
+
+
+pl.atrit=0.5
+pl.veloc=0.5
 function loop(frame)
     pl.x = pl.x + pl.xv
     pl.y = pl.y + pl.yv
     if not (ui.btn(0) or ui.btn(1) or ui.btn(2) or ui.btn(3)) then 
         pl.xv = pl.xv + ((0-pl.xv)*pl.atrit)
+        pl.yv = pl.yv + ((0-pl.yv)*pl.atrit)
     end
-    pl.yv = pl.yv + ((0-pl.yv)*pl.atrit)
+    
     if ui.btn(0) then pl.xv = pl.xv + ((-5-pl.xv)*pl.veloc) end
     if ui.btn(1) then pl.xv = pl.xv + ((5-pl.xv)*pl.veloc) end
     if ui.btn(2) then pl.yv = pl.yv + ((-5-pl.yv)*pl.veloc) end
