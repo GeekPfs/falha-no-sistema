@@ -4,7 +4,6 @@ require "sprites"
 
 -- =========================================================
 -- CONFIGURACAO GERAL
--- Altere estes valores para personalizar o jogo.
 -- =========================================================
 
 CFG = {
@@ -66,7 +65,7 @@ CFG = {
     TREMOR_MAX = 7,
 
     -- ABERTURA
-    INTRO_TEXTO = "VIRUS INVADIU O SISTEMA...",
+    INTRO_TEXTO = "UM VIRUS INVADIU O SISTEMA...",
     INTRO_TEXTO_2 = "SOBREVIVA.",
     INTRO_VELOCIDADE = 2,
     INTRO_ESPERA = 75,
