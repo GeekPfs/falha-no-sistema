@@ -71,7 +71,7 @@ function loop(frame)
     ui.cls(Palette.hex(0x45283c))
 
     ui.circfill(virus[1].x, virus[1].y, 5, Palette.hex(0xFFFFFF))
-    ui.circfill(ponto.x, ponto.y, 5, Palette.hex(0xFFFFFF))
+    ui.circfill(ponto.x, ponto.y, 2, Palette.hex(0xFFFFFF))
     ui.print("Oi, Lupi td bem?", 32, 32, Palette.hex(0xFFFFFF))
     ui.rectfill(pl.x, pl.y, pl.x + 10, pl.y + 10, Palette.hex(0xFFFFFF))
 end
