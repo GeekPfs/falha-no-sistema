@@ -11,9 +11,16 @@ function gerar_virus()
     }
 end
 
+function gerar_ponto()
+    return {
+        x = math.random(0, 480),
+        y = math.random(0, 270)
+    }
+end
+
 virus = {}
 virus[1] = gerar_virus()
-
+ponto = gerar_ponto()
 pl = {}
 pl.x = 10
 pl.y = 10
@@ -64,6 +71,7 @@ function loop(frame)
     ui.cls(Palette.hex(0x45283c))
 
     ui.circfill(virus[1].x, virus[1].y, 5, Palette.hex(0xFFFFFF))
+    ui.circfill(ponto.x, ponto.y, 5, Palette.hex(0xFFFFFF))
     ui.print("Oi, Lupi td bem?", 32, 32, Palette.hex(0xFFFFFF))
     ui.rectfill(pl.x, pl.y, pl.x + 10, pl.y + 10, Palette.hex(0xFFFFFF))
 end
