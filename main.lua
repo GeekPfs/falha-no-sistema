@@ -21,6 +21,7 @@ end
 virus = {}
 virus[1] = gerar_virus()
 ponto = gerar_ponto()
+score = 0
 pl = {}
 pl.x = 10
 pl.y = 10
@@ -62,8 +63,9 @@ function loop(frame)
     end
 
 
-    if pl.x > ponto.x and pl.x < ponto.x + 10 and pl.y > ponto.y and pl.y < ponto.y + 10 then
+    if pl.x < ponto.x + 10 and pl.x + 10 > ponto.x and pl.y < ponto.y + 10 and pl.y + 10 > ponto.y then
         ponto=gerar_ponto()
+        score=score+1
     end
     for i = 1, #Palette do
         local color = Palette[i]
