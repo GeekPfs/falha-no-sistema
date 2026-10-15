@@ -87,7 +87,7 @@ function loop(frame)
         ui.palset(i - 1, color)
     end
 
-    ui.clip(0, 0, 480, 270)
+    ui.clip(0, 0, 128, 128)
     ui.camera(0, 0)
     ui.cls(Palette.hex(0x45283c))
 
