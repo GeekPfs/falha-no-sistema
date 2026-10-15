@@ -4,7 +4,7 @@ require "sprites"
 function gerar_virus()
     return 
     x = math.random(0,480),
-    y = math.random(0,270),
+    y = math.random(0,270)
     
 end
 
